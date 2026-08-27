@@ -13,7 +13,8 @@ review.py — sm2-flashcard-skill 的命令行入口
 设计要点：
   1. 命令参数走 argparse，错误提示友好，AI 助手也能轻易解析输出
   2. 复习支持 --batch 批量模式：把质量分写进文件里，方便自动化/测试/演示
-  3. 所有写操作前先备份旧文件，防止中途出错把数据搞丢
+  3. 首次使用自动生成内置词库（与 server.py 行为一致），clone 即用
+  4. 所有写操作前先备份旧文件，防止中途出错把数据搞丢
 """
 from __future__ import annotations
 import argparse
@@ -201,6 +202,11 @@ def main(argv: Optional[List[str]] = None) -> int:
     p_stats = sub.add_parser("stats", help="查看学习统计")
     p_stats.set_defaults(func=cmd_stats)
     args = parser.parse_args(argv)
+    # 首次使用且卡组不存在时，自动用内置词表生成词库（与 server.py 行为一致）
+    if not os.path.exists(DECK_PATH):
+        print("[init] 未发现 data/deck.json，正在用内置词表生成词库…")
+        from build_deck import build
+        build()
     return args.func(args)
 if __name__ == "__main__":
     sys.exit(main())
