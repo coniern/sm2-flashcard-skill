@@ -58,8 +58,5 @@ sm2-flashcard-skill/
 2. 改 `SKILL.md` 里的 `name` 和 `description`，描述你的具体使用场景
 3. 清空 `data/deck.json` 里的示例卡，用 `add` 命令加入你自己的卡
 4. 让 AI 助手读 `SKILL.md`，它就能在你需要复习时自动调用
-## 配图
-`images/` 下的 3 张结构图由 `scripts/gen_diagrams.py` 用 matplotlib 确定性生成，
-可运行 `python3 scripts/gen_diagrams.py` 随时复现（无需第三方依赖即可出图）。
 ## License
 MIT
