@@ -13,8 +13,9 @@ server.py — sm2-flashcard-skill 的 Web 服务入口
 
 设计要点（延续"成熟 Skill"标准）：
   1. 零第三方依赖：http.server + json + threading，clone 即跑
-  2. 写操作加线程锁 + 写前备份 .bak：数据安全优先
-  3. 数据结构与 CLI 版完全兼容（同一份 deck.json / review_log.json）
+  2. 首次启动自动生成内置词库（data/deck.json 不入库，由脚本生成）
+  3. 写操作加线程锁 + 写前备份 .bak：数据安全优先
+  4. 数据结构与 CLI 版完全兼容（同一份 deck.json / review_log.json）
 """
 from __future__ import annotations
 
@@ -168,6 +169,7 @@ def get_due_cards(limit: int = 20) -> List[Dict[str, Any]]:
     for c in due[:limit]:
         out.append({
             "front": c.get("front", ""),
+            "phonetic": c.get("phonetic", ""),
             "back": c.get("back", ""),
             "repetitions": int(c.get("repetitions", 0)),
             "interval": int(c.get("interval", 0)),
@@ -428,11 +430,12 @@ def main() -> int:
     parser.add_argument("--port", type=int, default=8000)
     args = parser.parse_args()
 
-    # 首次启动且卡组不存在时，给出提示（避免空库）
+    # 首次启动且卡组不存在时，自动用内置词表生成词库（开箱即用）
     _ensure_data_dir()
     if not os.path.exists(DECK_PATH):
-        print("[warn] data/deck.json 不存在，请先放入卡组文件。")
-        print("       可运行 scripts/build_deck.py 重建内置词库。")
+        print("[init] 未发现 data/deck.json，正在用内置词表生成词库…")
+        from scripts.build_deck import build
+        build()
 
     server = ThreadingHTTPServer((args.host, args.port), Handler)
     print(f"sm2-flashcard-skill 已启动：http://{args.host}:{args.port}")

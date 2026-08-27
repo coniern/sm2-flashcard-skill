@@ -1,10 +1,9 @@
 # Python
 __pycache__/
 *.py[cod]
-
-# 自动生成的数据
+# 运行时生成的数据（首次运行 server.py 或 build_deck.py 自动生成）
+data/deck.json
 data/review_log.json
 data/*.bak
-
 # 系统文件
 .DS_Store
