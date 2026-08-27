@@ -5,9 +5,9 @@
 # 必须包含 name 和 description 两个字段；其余按需扩展。
 # ---------------------------------------------------------------------------
 name: sm2-flashcard-skill
-version: 2.0.0
+version: 2.1.0
 description: >
-  基于 SM-2 间隔重复算法的记忆卡片技能：内置 131 个考研必考词（含音标），
+  基于 SM-2 间隔重复算法的记忆卡片技能：内置 192 个考研必考词（含音标），
   提供 Web 界面（卡片翻转复习/统计/词库管理）与命令行（add/review/stats）
   双入口。适用于背单词、备考（考研/法考/医考/教资）、记忆专业概念等任何
   需要长期记忆的场景。用户提到"复习""记忆""卡片""遗忘曲线""间隔重复""背单词"，
@@ -16,13 +16,14 @@ metadata:
   requires:
     bins: ["python3"]        # 运行时依赖：只需 python3，无第三方库
   data:
-    - data/deck.json         # 卡组文件（首次运行自动生成，131 个考研必考词）
+    - data/deck.json         # 卡组文件（192 个考研必考词）
     - data/review_log.json   # 复习历史
 ---
 # sm2-flashcard-skill —— 间隔重复记忆卡
 > 一个**可以直接运行**的成熟 Skill 示例，同时是一份"如何写 Skill"的学习资料。
 > 它把经典的 SM-2 间隔重复算法封装成：算法核心 + Web 界面 + 命令行 + 数据 + 测试。
-> v2.0 新增：简洁美观的 Web UI（卡片翻转 / 统计 / 词库管理）与 131 词考研词库。
+> v2.1 新增：词库扩至 192 词（补 Unit 1 的 re-/con-/priv-/sub- 词族）。
+> v2.0 新增：简洁美观的 Web UI（卡片翻转 / 统计 / 词库管理）与考研词库。
 ## 这个技能解决什么问题
 人学了东西一定会忘，而 SM-2 算法能在"快要忘掉的那一刻"安排复习，
 用最少的次数达到长期记忆（原理见 `references/SM2_algorithm.md`）。
@@ -43,7 +44,7 @@ cd sm2-flashcard-skill
 python3 server.py
 # 浏览器打开 http://127.0.0.1:8000 即可复习
 # ② 命令行用法
-python3 scripts/review.py stats          # 查看统计（内置 131 个考研必考词）
+python3 scripts/review.py stats          # 查看统计（内置 192 个考研必考词）
 python3 scripts/review.py add "时间复杂度" "描述算法运行时间随输入规模的增长趋势"
 python3 scripts/review.py review         # 交互式复习
 # ③ 跑一遍单元测试，验证算法正确（无需安装任何依赖）
@@ -58,11 +59,11 @@ sm2-flashcard-skill/
 │   ├── sm2.py                # SM-2 算法核心（纯函数，最易测试）
 │   ├── review.py             # 命令行入口：add / review / stats
 │   ├── build_deck.py         # 重建内置词库
-│   └── deck_raw.py           # 考研必考词原始词表（131 词，含音标）
+│   └── deck_raw.py           # 考研必考词原始词表（192 词，含音标）
 ├── web/
 │   └── index.html            # 单页应用 UI（内嵌 CSS/JS，无外部依赖）
 ├── data/
-│   ├── deck.json             # 卡组数据（首次运行 server.py 自动生成，131 词）
+│   ├── deck.json             # 卡组数据（首次运行 server.py 自动生成，192 词）
 │   └── review_log.json       # 复习历史（自动生成）
 ├── references/
 │   └── SM2_algorithm.md      # 算法原理文档（讲清"为什么"）
@@ -75,7 +76,7 @@ sm2-flashcard-skill/
 | 有明确使用场景 | 所有"长期记忆"场景都适用，内置真实考研词库 |
 | 逻辑有依据 | SM-2 是 SuperMemo/Anki 验证几十年的标准算法 |
 | 能跑通、可验证 | 11 个单元测试一键运行；Web + CLI 双入口实测可用 |
-| 拿来就用 | 内置 131 词 + 开箱即用的 Web 界面，零依赖 |
+| 拿来就用 | 内置 192 词 + 开箱即用的 Web 界面，零依赖 |
 | 代码可读 | 常量命名、函数注释、数据结构字段说明齐全 |
 | 数据安全 | 写入前自动备份 .bak，损坏时回退默认值不崩 |
 | 可扩展 | 卡组为纯 JSON + 词表脚本，可批量导入扩充 |
