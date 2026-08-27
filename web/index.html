@@ -1,0 +1,512 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>考研单词 · SM-2 记忆卡</title>
+<style>
+  :root {
+    --bg: #F7F5F0;
+    --card: #FFFFFF;
+    --ink: #1F3864;
+    --blue: #5B8DD9;
+    --gold: #E8A33D;
+    --green: #4C8C6A;
+    --red: #C0504D;
+    --orange: #D97A3D;
+    --gray: #8A8F98;
+    --line: #E8E3D8;
+    --shadow: 0 10px 30px rgba(31, 56, 100, .08);
+    --radius: 18px;
+  }
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+  body {
+    font-family: -apple-system, "PingFang SC", "Microsoft YaHei", "Noto Sans CJK SC", sans-serif;
+    background: var(--bg);
+    color: var(--ink);
+    min-height: 100vh;
+    display: flex;
+    flex-direction: column;
+  }
+  header {
+    background: var(--card);
+    border-bottom: 1px solid var(--line);
+    padding: 0 24px;
+    height: 64px;
+    display: flex;
+    align-items: center;
+    gap: 20px;
+    position: sticky; top: 0; z-index: 10;
+  }
+  .logo {
+    width: 34px; height: 34px; border-radius: 10px;
+    background: linear-gradient(135deg, var(--ink), var(--blue));
+    color: #fff; font-weight: 800; font-size: 17px;
+    display: flex; align-items: center; justify-content: center;
+  }
+  .brand { font-weight: 700; font-size: 17px; letter-spacing: .3px; }
+  .brand small { color: var(--gray); font-weight: 400; font-size: 12px; margin-left: 6px; }
+  nav { margin-left: auto; display: flex; gap: 4px; }
+  nav button {
+    border: none; background: transparent; color: var(--gray);
+    font-size: 14px; font-weight: 600; padding: 8px 16px; border-radius: 10px;
+    cursor: pointer; transition: all .18s;
+  }
+  nav button:hover { background: #F1EEE6; color: var(--ink); }
+  nav button.active { background: var(--ink); color: #fff; }
+  .due-badge {
+    background: #FDF0E3; color: var(--orange);
+    font-size: 12.5px; font-weight: 700; padding: 6px 12px; border-radius: 20px;
+    white-space: nowrap;
+  }
+  main { flex: 1; width: 100%; max-width: 860px; margin: 0 auto; padding: 32px 20px 48px; }
+  section[hidden] { display: none; }
+
+  .study-top { display: flex; align-items: center; justify-content: space-between; margin-bottom: 22px; }
+  .study-top h2 { font-size: 20px; }
+  .progress-track {
+    width: 220px; height: 8px; background: #EDE9DE; border-radius: 10px; overflow: hidden;
+  }
+  .progress-fill {
+    height: 100%; width: 0%;
+    background: linear-gradient(90deg, var(--blue), var(--green));
+    border-radius: 10px; transition: width .4s ease;
+  }
+  .progress-label { font-size: 12.5px; color: var(--gray); margin-top: 6px; text-align: right; }
+
+  .card-wrap { perspective: 1400px; margin: 8px 0 26px; }
+  .card {
+    position: relative; width: 100%; height: 340px;
+    transform-style: preserve-3d; transition: transform .5s cubic-bezier(.4,.2,.2,1);
+    cursor: pointer;
+  }
+  .card.flipped { transform: rotateY(180deg); }
+  .face {
+    position: absolute; inset: 0; backface-visibility: hidden; -webkit-backface-visibility: hidden;
+    background: var(--card); border-radius: var(--radius); box-shadow: var(--shadow);
+    display: flex; flex-direction: column; align-items: center; justify-content: center;
+    padding: 40px; text-align: center;
+    border: 1px solid var(--line);
+  }
+  .face .tag {
+    position: absolute; top: 22px; left: 26px;
+    font-size: 11.5px; color: var(--gray); letter-spacing: 1px; font-weight: 600;
+  }
+  .face .word {
+    font-size: 44px; font-weight: 800; letter-spacing: .5px; line-height: 1.2;
+    word-break: break-word; max-width: 100%;
+  }
+  .face .phonetic { margin-top: 12px; color: var(--blue); font-size: 19px; }
+  .face.back { transform: rotateY(180deg); background: #FBF9F4; }
+  .face.back .meaning { font-size: 22px; line-height: 1.75; font-weight: 500; max-width: 95%; }
+  .face.back .hint2 { position: absolute; bottom: 22px; font-size: 12px; color: var(--gray); }
+  .flip-hint { text-align: center; color: var(--gray); font-size: 13.5px; margin: 6px 0 18px; }
+
+  .rating { display: flex; gap: 10px; justify-content: center; flex-wrap: wrap; }
+  .rating button {
+    border: none; border-radius: 14px; padding: 14px 0; flex: 1; min-width: 100px;
+    font-size: 14.5px; font-weight: 700; color: #fff; cursor: pointer;
+    box-shadow: 0 6px 16px rgba(0,0,0,.10); transition: transform .15s, box-shadow .15s;
+  }
+  .rating button:hover { transform: translateY(-3px); box-shadow: 0 10px 22px rgba(0,0,0,.16); }
+  .rating button:active { transform: translateY(0); }
+  .rating .q0 { background: linear-gradient(135deg,#C0504D,#A84441); }
+  .rating .q1 { background: linear-gradient(135deg,#D97A3D,#C96A30); }
+  .rating .q2 { background: linear-gradient(135deg,#E8A33D,#D98F2B); }
+  .rating .q3 { background: linear-gradient(135deg,#8FB0A0,#6F9A88); }
+  .rating .q4 { background: linear-gradient(135deg,#5B8DD9,#4778C4); }
+  .rating .q5 { background: linear-gradient(135deg,#4C8C6A,#3A7A58); }
+  .rating small { display: block; font-size: 11px; font-weight: 400; opacity: .85; margin-top: 3px; }
+
+  .done-card {
+    background: var(--card); border: 1px solid var(--line); border-radius: var(--radius);
+    box-shadow: var(--shadow); padding: 48px 32px; text-align: center;
+  }
+  .done-card .big { font-size: 56px; }
+  .done-card h3 { font-size: 22px; margin: 12px 0 8px; }
+  .done-card p { color: var(--gray); font-size: 14.5px; line-height: 1.7; }
+  .done-card button {
+    margin-top: 22px; border: none; background: var(--ink); color: #fff;
+    padding: 11px 26px; border-radius: 12px; font-size: 14.5px; font-weight: 600; cursor: pointer;
+  }
+
+  .stat-grid { display: grid; grid-template-columns: repeat(4, 1fr); gap: 14px; margin-bottom: 22px; }
+  .stat-card {
+    background: var(--card); border: 1px solid var(--line); border-radius: 16px;
+    padding: 20px 16px; box-shadow: var(--shadow); text-align: center;
+  }
+  .stat-card .num { font-size: 30px; font-weight: 800; line-height: 1.2; }
+  .stat-card .lbl { color: var(--gray); font-size: 12.5px; margin-top: 6px; }
+  .stat-card .num.blue { color: var(--blue); }
+  .stat-card .num.green { color: var(--green); }
+  .stat-card .num.gold { color: var(--gold); }
+  .stat-card .num.orange { color: var(--orange); }
+  .panel {
+    background: var(--card); border: 1px solid var(--line); border-radius: var(--radius);
+    padding: 24px; box-shadow: var(--shadow);
+  }
+  .panel h3 { font-size: 16px; margin-bottom: 18px; }
+  .bars { display: flex; align-items: flex-end; gap: 10px; height: 150px; }
+  .bar-col { flex: 1; display: flex; flex-direction: column; align-items: center; gap: 8px; height: 100%; justify-content: flex-end; }
+  .bar {
+    width: 100%; max-width: 42px; border-radius: 8px 8px 3px 3px;
+    background: linear-gradient(180deg, var(--blue), #7FA8E3);
+    min-height: 3px; transition: height .5s ease;
+  }
+  .bar-col .day { font-size: 11px; color: var(--gray); }
+  .bar-col .val { font-size: 11px; color: var(--ink); font-weight: 600; }
+  .hint-note { color: var(--gray); font-size: 12.5px; margin-top: 14px; }
+
+  .deck-tools { display: flex; gap: 10px; margin-bottom: 16px; flex-wrap: wrap; }
+  .deck-tools input[type=text] {
+    flex: 1; min-width: 200px; border: 1px solid var(--line); border-radius: 12px;
+    padding: 11px 16px; font-size: 14px; outline: none; background: var(--card);
+    transition: border-color .18s;
+  }
+  .deck-tools input:focus { border-color: var(--blue); }
+  .deck-tools .btn {
+    border: none; border-radius: 12px; padding: 0 20px; font-size: 14px; font-weight: 600;
+    cursor: pointer; background: var(--ink); color: #fff; transition: opacity .15s;
+  }
+  .deck-tools .btn.ghost { background: transparent; border: 1px solid var(--line); color: var(--red); }
+  .deck-tools .btn:hover { opacity: .88; }
+  .add-form {
+    display: grid; grid-template-columns: 1fr 2fr auto; gap: 10px; margin-bottom: 18px;
+  }
+  .add-form input {
+    border: 1px solid var(--line); border-radius: 12px; padding: 11px 14px;
+    font-size: 14px; outline: none; background: var(--card);
+  }
+  .add-form input:focus { border-color: var(--blue); }
+  .deck-list { max-height: 520px; overflow-y: auto; }
+  .deck-row {
+    display: grid; grid-template-columns: 150px 1fr 130px 46px; gap: 12px; align-items: center;
+    padding: 12px 6px; border-bottom: 1px solid var(--line);
+  }
+  .deck-row .w { font-weight: 700; font-size: 15px; }
+  .deck-row .m { color: var(--gray); font-size: 13px; line-height: 1.5; }
+  .badge {
+    font-size: 11.5px; font-weight: 700; padding: 4px 10px; border-radius: 20px; text-align: center;
+  }
+  .badge.due { background: #FDF0E3; color: var(--orange); }
+  .badge.mastered { background: #E7F2EC; color: var(--green); }
+  .badge.new { background: #EEF2FB; color: var(--blue); }
+  .badge.learning { background: #F3F0E9; color: var(--gray); }
+  .del-btn {
+    border: none; background: transparent; color: var(--gray); font-size: 17px;
+    cursor: pointer; border-radius: 8px; width: 34px; height: 34px; transition: all .15s;
+  }
+  .del-btn:hover { background: #FBE9E7; color: var(--red); }
+  .deck-empty { color: var(--gray); text-align: center; padding: 40px 0; font-size: 14px; }
+
+  footer {
+    text-align: center; color: var(--gray); font-size: 12.5px; padding: 20px;
+    border-top: 1px solid var(--line);
+  }
+  @media (max-width: 640px) {
+    .stat-grid { grid-template-columns: repeat(2, 1fr); }
+    .card { height: 300px; }
+    .face .word { font-size: 34px; }
+    .face.back .meaning { font-size: 18px; }
+    .rating button { min-width: 30%; }
+    .deck-row { grid-template-columns: 110px 1fr; }
+    .deck-row .badge, .deck-row .del-btn { grid-column: span 1; }
+    .add-form { grid-template-columns: 1fr; }
+    .due-badge { display: none; }
+  }
+</style>
+</head>
+<body>
+<header>
+  <div class="logo">忆</div>
+  <div class="brand">考研单词·SM-2 记忆卡<small>spaced repetition</small></div>
+  <nav>
+    <button data-view="learn" class="active">学习</button>
+    <button data-view="stats">统计</button>
+    <button data-view="deck">词库</button>
+  </nav>
+  <div class="due-badge" id="dueBadge">…</div>
+</header>
+
+<main>
+  <section id="view-learn">
+    <div class="study-top">
+      <h2>今日复习</h2>
+      <div style="text-align:right">
+        <div class="progress-track"><div class="progress-fill" id="progressFill"></div></div>
+        <div class="progress-label" id="progressLabel"></div>
+      </div>
+    </div>
+
+    <div id="studyArea">
+      <div class="card-wrap">
+        <div class="card" id="card" onclick="flipCard()">
+          <div class="face front">
+            <div class="tag">FRONT · 正面</div>
+            <div class="word" id="frontText"></div>
+            <div class="phonetic" id="phoneticText"></div>
+          </div>
+          <div class="face back">
+            <div class="tag">BACK · 释义</div>
+            <div class="meaning" id="backText"></div>
+            <div class="hint2" id="metaText"></div>
+          </div>
+        </div>
+      </div>
+      <div class="flip-hint" id="flipHint">点击卡片查看释义</div>
+      <div class="rating" id="rating" hidden>
+        <button class="q0" onclick="rate(0)">忘记<small>完全想不起</small></button>
+        <button class="q1" onclick="rate(1)">很难<small>只记得一点</small></button>
+        <button class="q2" onclick="rate(2)">勉强<small>部分想起</small></button>
+        <button class="q3" onclick="rate(3)">模糊<small>想起来但慢</small></button>
+        <button class="q4" onclick="rate(4)">想起<small>比较顺利</small></button>
+        <button class="q5" onclick="rate(5)">完美<small>秒答</small></button>
+      </div>
+    </div>
+
+    <div class="done-card" id="doneCard" hidden>
+      <div class="big">🎉</div>
+      <h3>今天的复习完成啦</h3>
+      <p id="doneText">休息一下，明天再来巩固。</p>
+      <button onclick="loadStudy()">再看一遍今天到期的</button>
+    </div>
+  </section>
+
+  <section id="view-stats" hidden>
+    <div class="stat-grid">
+      <div class="stat-card"><div class="num blue" id="stTotal">–</div><div class="lbl">总词数</div></div>
+      <div class="stat-card"><div class="num orange" id="stDue">–</div><div class="lbl">今日到期</div></div>
+      <div class="stat-card"><div class="num green" id="stMastered">–</div><div class="lbl">已掌握</div></div>
+      <div class="stat-card"><div class="num gold" id="stReviewed">–</div><div class="lbl">今日已复习</div></div>
+    </div>
+    <div class="panel">
+      <h3>最近 7 天复习量</h3>
+      <div class="bars" id="bars"></div>
+      <div class="hint-note" id="statsNote"></div>
+    </div>
+  </section>
+
+  <section id="view-deck" hidden>
+    <div class="deck-tools">
+      <input type="text" id="searchInput" placeholder="搜索单词或释义…" oninput="loadDeck()">
+      <button class="btn ghost" onclick="resetProgress()">重置进度</button>
+    </div>
+    <div class="add-form">
+      <input type="text" id="addFront" placeholder="单词，如 abundant">
+      <input type="text" id="addBack" placeholder="释义，如 adj. 丰富的，充裕的">
+      <button class="btn" onclick="addCard()">添加</button>
+    </div>
+    <div class="deck-list" id="deckList"><div class="deck-empty">加载中…</div></div>
+  </section>
+</main>
+
+<footer>SM-2 间隔重复算法 · 数据保存在本地 data/deck.json · 代码开源：github.com/coniern/sm2-flashcard-skill</footer>
+
+<script>
+let dueCards = [];
+let current = 0;
+let reviewedInSession = 0;
+
+const $ = (id) => document.getElementById(id);
+
+document.querySelectorAll('nav button').forEach(btn => {
+  btn.addEventListener('click', () => {
+    document.querySelectorAll('nav button').forEach(b => b.classList.remove('active'));
+    btn.classList.add('active');
+    ['learn','stats','deck'].forEach(v => $(`view-${v}`).hidden = (v !== btn.dataset.view));
+    if (btn.dataset.view === 'learn') loadStudy();
+    if (btn.dataset.view === 'stats') loadStats();
+    if (btn.dataset.view === 'deck') loadDeck();
+  });
+});
+
+async function refreshBadge() {
+  try {
+    const r = await fetch('/api/stats');
+    const j = await r.json();
+    if (j.ok) {
+      const s = j.data;
+      $('dueBadge').textContent = `今日待复习 ${s.due} 词`;
+    }
+  } catch(e) {}
+}
+
+async function loadStudy() {
+  $('doneCard').hidden = true;
+  $('studyArea').hidden = false;
+  const r = await fetch('/api/due?limit=50');
+  const j = await r.json();
+  dueCards = j.ok ? j.data : [];
+  current = 0;
+  reviewedInSession = 0;
+  if (dueCards.length === 0) {
+    $('studyArea').hidden = true;
+    $('doneCard').hidden = false;
+    $('doneText').textContent = '今天到期的单词都复习完了。明日再见～';
+    refreshBadge();
+    return;
+  }
+  showCard();
+  refreshBadge();
+}
+
+function showCard() {
+  const c = dueCards[current];
+  $('frontText').textContent = c.front;
+  $('phoneticText').textContent = c.phonetic || '';
+  $('backText').textContent = c.back;
+  $('metaText').textContent = `已连续记住 ${c.repetitions} 次 · 难度系数 ${c.ease.toFixed(2)}`;
+  $('card').classList.remove('flipped');
+  $('flipHint').textContent = '点击卡片查看释义';
+  $('rating').hidden = true;
+  $('progressFill').style.width = `${Math.round((current / dueCards.length) * 100)}%`;
+  $('progressLabel').textContent = `第 ${current + 1} / ${dueCards.length} 张`;
+}
+
+function flipCard() {
+  const card = $('card');
+  if (card.classList.contains('flipped')) return;
+  card.classList.add('flipped');
+  $('flipHint').textContent = '这次回忆得怎么样？';
+  $('rating').hidden = false;
+}
+
+async function rate(q) {
+  const c = dueCards[current];
+  try {
+    const r = await fetch('/api/review', {
+      method: 'POST',
+      headers: {'Content-Type': 'application/json'},
+      body: JSON.stringify({front: c.front, back: c.back, quality: q})
+    });
+    const j = await r.json();
+    if (!j.ok) { alert(j.error || '提交失败'); return; }
+    reviewedInSession++;
+    current++;
+    if (current >= dueCards.length) {
+      $('studyArea').hidden = true;
+      $('doneCard').hidden = false;
+      $('doneText').textContent = `这次共复习了 ${reviewedInSession} 个单词，进度已保存。坚持就是胜利！`;
+    } else {
+      showCard();
+    }
+    refreshBadge();
+  } catch(e) { alert('网络错误：' + e.message); }
+}
+
+async function loadStats() {
+  const [sr, hr] = await Promise.all([fetch('/api/stats'), fetch('/api/history')]);
+  const sj = await sr.json();
+  const hj = await hr.json();
+  if (!sj.ok) return;
+  const s = sj.data;
+  $('stTotal').textContent = s.total;
+  $('stDue').textContent = s.due;
+  $('stMastered').textContent = s.mastered;
+  $('stReviewed').textContent = s.reviewed_today;
+
+  const bars = $('bars');
+  bars.innerHTML = '';
+  let hist = [];
+  if (hj.ok && hj.data && hj.data.per_day) {
+    const today = hj.data.today;
+    const days = [];
+    for (let i = 6; i >= 0; i--) {
+      const d = new Date(today);
+      d.setDate(d.getDate() - i);
+      const key = d.toISOString().slice(0,10);
+      days.push({key, count: hj.data.per_day[key] ? hj.data.per_day[key].count : 0});
+    }
+    hist = days;
+  } else {
+    hist = s.recent7.map((n,i)=>({count:n}));
+  }
+  const max = Math.max(1, ...hist.map(h=>h.count));
+  hist.forEach((h, i) => {
+    const col = document.createElement('div');
+    col.className = 'bar-col';
+    const bar = document.createElement('div');
+    bar.className = 'bar';
+    bar.style.height = `${Math.max(3, Math.round((h.count / max) * 100))}%`;
+    const val = document.createElement('div');
+    val.className = 'val';
+    val.textContent = h.count;
+    const day = document.createElement('div');
+    day.className = 'day';
+    day.textContent = i === 6 ? '今天' : (h.key ? h.key.slice(5).replace('-','/') : `-${5-i}`);
+    col.appendChild(bar); col.appendChild(val); col.appendChild(day);
+    bars.appendChild(col);
+  });
+  const masteredPct = s.total ? Math.round((s.mastered / s.total) * 100) : 0;
+  $('statsNote').textContent = `掌握率 ${masteredPct}%（连续记住 ≥5 次视为掌握）· 平均难度系数 ${s.avg_ease}`;
+}
+
+async function loadDeck() {
+  const kw = $('searchInput').value.trim();
+  const url = '/api/cards' + (kw ? `?q=${encodeURIComponent(kw)}` : '');
+  const r = await fetch(url);
+  const j = await r.json();
+  const list = $('deckList');
+  if (!j.ok || !j.data.length) {
+    list.innerHTML = '<div class="deck-empty">没有找到单词' + (kw ? '，换个关键词试试' : '，点击上方添加') + '</div>';
+    return;
+  }
+  list.innerHTML = '';
+  j.data.forEach(c => {
+    const row = document.createElement('div');
+    row.className = 'deck-row';
+    const badge = c.repetitions >= 5
+      ? '<span class="badge mastered">已掌握</span>'
+      : (c.due && c.due <= new Date().toISOString().slice(0,10)
+        ? '<span class="badge due">待复习</span>'
+        : (c.due ? '<span class="badge learning">学习中</span>' : '<span class="badge new">新词</span>'));
+    row.innerHTML = `
+      <div class="w">${escapeHtml(c.front)}</div>
+      <div class="m">${escapeHtml(c.back)}</div>
+      <div>${badge}</div>
+      <button class="del-btn" title="删除" onclick="deleteCard('${escapeAttr(c.front)}')">✕</button>`;
+    list.appendChild(row);
+  });
+}
+
+async function addCard() {
+  const front = $('addFront').value.trim();
+  const back = $('addBack').value.trim();
+  if (!front || !back) { alert('请填写单词和释义'); return; }
+  const r = await fetch('/api/add', {
+    method: 'POST', headers: {'Content-Type':'application/json'},
+    body: JSON.stringify({front, back})
+  });
+  const j = await r.json();
+  if (!j.ok) { alert(j.error || '添加失败'); return; }
+  $('addFront').value = ''; $('addBack').value = '';
+  loadDeck(); refreshBadge();
+}
+
+async function deleteCard(front) {
+  if (!confirm(`确定删除「${front}」吗？`)) return;
+  const r = await fetch('/api/delete', {
+    method: 'POST', headers: {'Content-Type':'application/json'},
+    body: JSON.stringify({front})
+  });
+  const j = await r.json();
+  if (!j.ok) { alert(j.error || '删除失败'); return; }
+  loadDeck(); refreshBadge();
+}
+
+async function resetProgress() {
+  if (!confirm('确定清空所有复习进度吗？词库会保留。')) return;
+  const r = await fetch('/api/reset', {method:'POST'});
+  const j = await r.json();
+  if (j.ok) { loadDeck(); loadStudy(); refreshBadge(); }
+}
+
+function escapeHtml(s) {
+  return String(s).replace(/[&<>"']/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+}
+function escapeAttr(s) { return escapeHtml(String(s).replace(/'/g, "\\'")); }
+
+loadStudy();
+</script>
+</body>
+</html>
